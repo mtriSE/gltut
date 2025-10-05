@@ -84,7 +84,7 @@ const std::string strFragmentShader(
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"   outputColor = vec4(0.5f, 0.5f, 1.0f, 1.0f);\n"
 	"}\n"
 );
 
@@ -109,14 +109,19 @@ const float vertexPositions[] = {
 GLuint positionBufferObject;
 GLuint vao;
 
-
+/**
+ * @brief Tạo buffer object
+ */
 void InitializeVertexBuffer()
 {
+	//! Tạo buffer object, lúc này thì buffer object chưa có dữ liệu
 	glGenBuffers(1, &positionBufferObject);
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);                                      //! bind object và target GL_ARRAY_BUFFER
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);  //! hàm này thực hiện 2 việc:
+																								//! 1. cấp phát bộ nhớ cho buffer đang được bound vào target GL_ARRAY_BUFFER
+																								//! 2. copy data từ memory của mình vào buffer object
+	glBindBuffer(GL_ARRAY_BUFFER, 0);                                                         //! unbind buffer object
 }
 
 //Called after the window and OpenGL are initialized. Called exactly once, before the main loop.
@@ -134,27 +139,48 @@ void init()
 //If you need continuous updates of the screen, call glutPostRedisplay() at the end of the function.
 void display()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);	//! Set trạng thái để xoá màn hình với màu đen 
+	glClear(GL_COLOR_BUFFER_BIT);			//! Thực hiện xoá, sử dụng đối số GL_COLOR_BUFFER_BIT để chỉ định
+											//! sẽ có ảnh hưởng đến Color Buffer (xoá buffer)
 
-	glUseProgram(theProgram);
+	glUseProgram(theProgram);				//! Set shader program được sử dụng
 
+	//! Set state functions: setup hệ toạ độ của triangle sẽ được render
+	//! nói OpenGL địa chỉ vùng nhớ mà các vị trí trong triangle sẽ được lấy từ đó
 	glBindBuffer(GL_ARRAY_BUFFER, positionBufferObject);
 	glEnableVertexAttribArray(0);
+	//! Hàm nhận 6 tham số:
+	//! 1. attribute index 
+	//! 2. có bao nhiêu values được thể hiện cho mỗi phần tử, ở đây là 4 (x,y,z,w)
+	//! 3. Kiểu dữ liệu của các thành phần trong buffer object, ở đây là GL_FLOAT
+	//! 4.
+	//! 5. khoảng cách giữa mỗi tập hợp các values, ở đây là 0 vì các values được đặt liên tiếp nhau
+	//! 6. byte offset from the value in the buffer object is at the front, which is 0 bytes from the beginning of the buffer object.
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
+	//! Hàm render
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 
+	//! Cleanup 
 	glDisableVertexAttribArray(0);
 	glUseProgram(0);
 
-	glutSwapBuffers();
+	/**
+	 * !The OpenGL framebuffer, as we set up in framework.cpp, is double-buffered. 
+	 * !This means that the image that is currently being shown to the user is not the same image we are rendering to. 
+	 * !Thus, all of our rendering is hidden from view until it is shown to the user. 
+	 * !This way, the user never sees a half-rendered image.
+	 */
+	//! FreeGLUT commands 
+	//! function that causes the image we are rendering to be displayed to the user
+	glutSwapBuffers(); 
 }
 
 //Called whenever the window is resized. The new window size is given, in pixels.
 //This is an opportunity to call glViewport or glScissor to keep up with the change in size.
 void reshape (int w, int h)
 {
+	//! nói OpenGL vùng nào trong vùng available để render.
 	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 }
 
