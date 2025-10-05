@@ -84,7 +84,7 @@ const std::string strFragmentShader(
 	"out vec4 outputColor;\n"
 	"void main()\n"
 	"{\n"
-	"   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+	"   outputColor = vec4(0.5f, 0.5f, 1.0f, 1.0f);\n"
 	"}\n"
 );
 
@@ -173,7 +173,7 @@ void display()
 	 */
 	//! FreeGLUT commands 
 	//! function that causes the image we are rendering to be displayed to the user
-	glutSwapBuffers();
+	glutSwapBuffers(); 
 }
 
 //Called whenever the window is resized. The new window size is given, in pixels.
